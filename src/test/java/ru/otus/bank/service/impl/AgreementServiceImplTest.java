@@ -56,4 +56,21 @@ public class AgreementServiceImplTest {
         Assertions.assertEquals(10, agreement.getId());
     }
 
+    @Test
+    public void testAddAgreement() {
+        String name = "test";
+        Agreement agreement = new Agreement();
+        agreement.setId(10L);
+        agreement.setName(name);
+
+        ArgumentCaptor<Agreement> savedAgreementsCaptor = ArgumentCaptor.captor();
+
+        Mockito.when(dao.save(savedAgreementsCaptor.capture())).thenReturn(agreement);
+
+        Agreement result = agreementServiceImpl.addAgreement(name);
+
+        Assertions.assertEquals(10, result.getId());
+        Assertions.assertEquals("test", result.getName());
+    }
+
 }
