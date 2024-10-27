@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.bank.dao.AccountDao;
@@ -17,8 +19,7 @@ import ru.otus.bank.service.exception.AccountException;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,6 +88,7 @@ public class AccountServiceImplTest {
         verify(accountDao).save(argThat(sourceMatcher));
         verify(accountDao).save(argThat(destinationMatcher));
     }
+
     @Test
     public void testAddAccount() {
 
@@ -114,4 +116,24 @@ public class AccountServiceImplTest {
         Assertions.assertEquals(35, result.getType());
         Assertions.assertEquals(new BigDecimal(100), result.getAmount());
     }
+
+
+    @ParameterizedTest
+    @CsvSource({"1, 100, 10, true", "2, 10, 100, false", "4, 10, 0, false", "1, 10, -1, false"})
+    public void testCharge(String sourceId, String sourceSum, String chargeSum, String expectedResult) {
+        Long sourceAccountId = Long.parseLong(sourceId);
+        BigDecimal sourceAmount = new BigDecimal(sourceSum);
+        BigDecimal chargeAmount = new BigDecimal(chargeSum);
+        Boolean expected = Boolean.parseBoolean(expectedResult);
+
+        Account sourceAccount = new Account();
+        sourceAccount.setAmount(sourceAmount);
+        sourceAccount.setId(sourceAccountId);
+
+        when(accountDao.findById(eq(sourceAccountId))).thenReturn(Optional.of(sourceAccount));
+
+        boolean result = accountServiceImpl.charge(sourceAccount.getId(), chargeAmount);
+        assertEquals(expected, result);
+    }
+
 }

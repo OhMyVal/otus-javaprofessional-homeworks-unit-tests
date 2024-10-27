@@ -60,4 +60,7 @@ public class PaymentProcessorImplTest {
 
     }
 
+    @Test
+    public void testMakeTransferWithComission() {
+    }
 }

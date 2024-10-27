@@ -42,8 +42,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean charge(Long accountId, BigDecimal chargeAmount) {
-        Account account= accountDao.findById(accountId)
+        Account account = accountDao.findById(accountId)
                 .orElseThrow(() -> new AccountException("No source account"));
+        if (account.getAmount().compareTo(chargeAmount) < 0) {
+            return false;
+        }
+        if (chargeAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            return false;
+        }
         account.setAmount(account.getAmount().subtract(chargeAmount));
         accountDao.save(account);
         return true;
@@ -59,16 +65,15 @@ public class AccountServiceImpl implements AccountService {
         Account destinationAccount = accountDao.findById(destinationAccountId)
                 .orElseThrow(() -> new AccountException("No destination account"));
 
-        sourceAccount.setAmount(sourceAccount.getAmount().subtract(sum));
-        destinationAccount.setAmount(destinationAccount.getAmount().add(sum));
-
         if (sourceAccount.getAmount().compareTo(sum) < 0) {
             return false;
         }
-
         if (sum.compareTo(BigDecimal.ZERO) <= 0) {
             return false;
         }
+
+        sourceAccount.setAmount(sourceAccount.getAmount().subtract(sum));
+        destinationAccount.setAmount(destinationAccount.getAmount().add(sum));
 
         accountDao.save(sourceAccount);
         accountDao.save(destinationAccount);
