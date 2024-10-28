@@ -120,7 +120,7 @@ public class AccountServiceImplTest {
 
     @ParameterizedTest
     @CsvSource({"1, 100, 10, true", "2, 10, 100, false", "4, 10, 0, false", "1, 10, -1, false"})
-    public void testCharge(String sourceId, String sourceSum, String chargeSum, String expectedResult) {
+    public void testChargeTrueOrFalse(String sourceId, String sourceSum, String chargeSum, String expectedResult) {
         Long sourceAccountId = Long.parseLong(sourceId);
         BigDecimal sourceAmount = new BigDecimal(sourceSum);
         BigDecimal chargeAmount = new BigDecimal(chargeSum);
@@ -134,6 +134,19 @@ public class AccountServiceImplTest {
 
         boolean result = accountServiceImpl.charge(sourceAccount.getId(), chargeAmount);
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void testChargeSourceNotFound() {
+
+        when(accountDao.findById(any())).thenReturn(Optional.empty());
+        AccountException result = assertThrows(AccountException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                accountServiceImpl.charge(1L, new BigDecimal(10));
+            }
+        });
+        assertEquals("No source account", result.getLocalizedMessage());
     }
 
 }
