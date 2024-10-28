@@ -32,10 +32,10 @@ public class PaymentProcessorImpl implements PaymentProcessor {
     }
 
     @Override
-    public boolean makeTransferWithComission(Agreement source, Agreement destination,
-                                             int sourceType, int destinationType,
-                                             BigDecimal amount,
-                                             BigDecimal comissionPercent) {
+    public boolean makeTransferWithCommission(Agreement source, Agreement destination,
+                                              int sourceType, int destinationType,
+                                              BigDecimal amount,
+                                              BigDecimal commissionPercent) {
 
         Account sourceAccount = accountService.getAccounts(source).stream()
                 .filter(account -> account.getType() == sourceType)
@@ -47,7 +47,16 @@ public class PaymentProcessorImpl implements PaymentProcessor {
                 .findAny()
                 .orElseThrow(() -> new AccountException("Account not found"));
 
-        accountService.charge(sourceAccount.getId(), amount.negate().multiply(comissionPercent));
+        BigDecimal summaryCharge = amount.add(amount.multiply(commissionPercent));
+
+        if (sourceAccount.getAmount().compareTo(summaryCharge) < 0) {
+            return false;
+        }
+        if (summaryCharge.compareTo(BigDecimal.ZERO) <= 0) {
+            return false;
+        }
+
+        accountService.charge(sourceAccount.getId(), amount.multiply(commissionPercent));
 
         return accountService.makeTransfer(sourceAccount.getId(), destinationAccount.getId(), amount);
     }

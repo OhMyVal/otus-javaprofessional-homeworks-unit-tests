@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.bank.dao.AccountDao;
-import ru.otus.bank.dao.AgreementDao;
 import ru.otus.bank.entity.Account;
 
 import ru.otus.bank.entity.Agreement;
@@ -29,7 +28,6 @@ public class AccountServiceImplTest {
     @Mock
     AccountDao accountDao;
 
-    private AgreementDao agreementDao = Mockito.mock(AgreementDao.class);
     @InjectMocks
     AccountServiceImpl accountServiceImpl;
 
